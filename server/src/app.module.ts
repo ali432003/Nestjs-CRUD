@@ -1,18 +1,20 @@
-import { Module } from '@nestjs/common';
+import { Module, NestMiddleware, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmployeeModule } from './employee/employee.module';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { ManagerModule } from './manager/manager.module';
+import { AuthMiddleware } from './middleware/auth.middleware';
+
+
 
 @Module({
-  imports: [EmployeeModule, ThrottlerModule.forRoot([
-    {
-      ttl: 60000,
-      limit: 3   //iska mtlb specific client se 1sec me 3 zyada request nhi aaskti
-    }
-  ])],
+  imports: [EmployeeModule, ManagerModule],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],  //yhn se mera throttler globally initialized hogya
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('/employee/create', '/employee/get', '/employee/get/:id','/employee/update/:id','/employee/delete/:id','/manager/auth/logout','/manager/auth/profile');
+  }
+
+}

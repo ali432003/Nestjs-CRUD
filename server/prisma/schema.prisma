@@ -10,11 +10,24 @@ datasource db {
   // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+model Manager {
+  Mid       Int        @id @default(autoincrement()) // Primary key
+  Mname     String
+  email     String     @unique
+  password  String     @unique
+  gender    Gender
+  Employees Employee[] // A user can have many employees (0 to many)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
 model Employee {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique 
+  id        Int      @id @default(autoincrement()) // Primary key for Employee
+  name      String   
+  email     String   @unique
   role      Role
+  employee  Manager?    @relation(fields: [managerId], references: [Mid]) // Reference Users model via Uid
+  managerId    Int? // Foreign key, reference to Users.Uid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -23,4 +36,9 @@ enum Role {
   Admin
   Moderator
   User
+}
+
+enum Gender {
+  Male
+  Female
 }

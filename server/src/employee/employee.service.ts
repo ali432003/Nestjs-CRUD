@@ -3,14 +3,17 @@ import { Prisma, Role } from '@prisma/client';
 import { prisma } from '../../prisma/index';
 import { CreateEmployeeDto } from 'src/dto/employee/employee-create.dto';
 import { UpdateEmployeeDto } from 'src/dto/employee/employee-update.dto';
+import { RequestWithUser } from 'src/middleware/auth.middleware';
+import { Response } from 'express';
 
 
 
 @Injectable()
 export class EmployeeService {
 
-  async create(createEmployeeDto: CreateEmployeeDto) {
+  async create(req: RequestWithUser, res: Response, createEmployeeDto: CreateEmployeeDto) {
     const { name, email, role } = createEmployeeDto
+    const managerId = req.currentUser.id
 
     const AlreadyExist = await prisma.employee.findUnique({
       where: {
@@ -23,41 +26,51 @@ export class EmployeeService {
       data: {
         name: name,
         email: email,
-        role: role
+        role: role,
+        managerId: managerId
       },
     });
-    return { message: "created", data: user }
+    return res.json({ message: "Employee created", data: user })
   }
 
-  async findAll(role?: Role) {
+  async findAll(req: RequestWithUser, res: Response, role?: Role) {
+    const managerId = req.currentUser.id
     if (role) {
       const rolledU = await prisma.employee.findMany({
         where: {
           role,
+          managerId: managerId
         }
       })
       if (!rolledU) throw new BadRequestException("role not found")
-      return { message: `Only ${role} fetched`, data: rolledU }
+      return res.json({ message: `Only ${role} fetched`, data: rolledU })
     };
-    const AllU = await prisma.employee.findMany()
-    return { message: "All User Fetched", data: AllU }
+    const AllU = await prisma.employee.findMany({
+      where: {
+        managerId: managerId
+      }
+    })
+    return res.json({ message: "All User Fetched", data: AllU })
   }
 
-  async findOne(id: number) {
-
+  async findOne(req: RequestWithUser, res: Response, id: number) {
+    const managerId = req.currentUser.id
     const UniqueU = await prisma.employee.findUnique({
       where: {
         id,
+        managerId: managerId
       }
     });
     if (!UniqueU) throw new NotFoundException("Employee Not exist")
-    return { message: `id ${id} user fetched`, data: UniqueU }
+    return res.json({ message: `id ${id} user fetched`, data: UniqueU })
   }
 
-  async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+  async update(req: RequestWithUser, res: Response, id: number, updateEmployeeDto: UpdateEmployeeDto) {
+    const managerId = req.currentUser.id
     const unique = await prisma.employee.findUnique({
       where: {
         id,
+        managerId: managerId
       }
     })
     if (!unique) {
@@ -69,14 +82,15 @@ export class EmployeeService {
       },
       data: updateEmployeeDto,
     });
-    return { message: `user updated on ${id}`, data: updateU }
+    return res.json({ message: `user updated on ${id}`, data: updateU })
   }
 
-  async remove(id: number) {
-
+  async remove(req: RequestWithUser, res: Response, id: number) {
+    const managerId = req.currentUser.id
     const unique = await prisma.employee.findUnique({
       where: {
         id,
+        managerId: managerId
       }
     })
     if (!unique) {
@@ -87,6 +101,6 @@ export class EmployeeService {
         id,
       }
     });
-    return { message: ` user deleted on ${id}`, data: deleteU }
+    return res.json({ message: ` user deleted on ${id}`, data: deleteU })
   }
 }
