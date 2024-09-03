@@ -12,7 +12,7 @@ import axios from 'axios'
 import BASE_URL from '@/core'
 import { useRouter } from 'next/navigation'
 
-export default function Component() {
+export default function Signup() {
     const [Mname, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')

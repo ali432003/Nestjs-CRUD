@@ -1,16 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-interface Manager {
-    Mname: String,
-    email: String,
-    geneder: "Male" | "Female" | "",
-    Employees: object[]
-}
-const initialState: Manager = {
-    Mname: "",
-    email: "",
-    geneder: "",
-    Employees: []
+
+const initialState : any = {
+    manager: {}
+
 }
 
 export const managerSlice = createSlice({
@@ -18,16 +11,10 @@ export const managerSlice = createSlice({
     initialState,
     reducers: {
         login: (state, action) => {
-            state.Mname = action.payload.Mname
-            state.email = action.payload.email
-            state.geneder = action.payload.gender
-            state.Employees = action.payload.Employees
+            state.manager = { ...action.payload, }
         },
         logout: (state, action) => {
-            state.Mname = ""
-            state.email = ""
-            state.geneder = ""
-            state.Employees = []
+           state.manager = null
         },
     }
 })

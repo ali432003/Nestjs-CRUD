@@ -28,6 +28,7 @@ export class ManagerService {
 
         const hashPassword = await bcrypt.hash(password, 12)
         const resp = await prisma.manager.create({
+            
             data: {
                 Mname: Mname,
                 gender: gender,
@@ -59,6 +60,7 @@ export class ManagerService {
                 email: email
             }
         })
+
         if (!userExist) {
             throw new NotFoundException("User not exist")
         }

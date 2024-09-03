@@ -1,16 +1,35 @@
+"use client"
+import { useState } from "react"
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { cookies } from "next/headers"
 import axios from "axios"
-import LogoutButton from "./LogoutButton"
 import BASE_URL from "@/core"
+import { useRouter } from 'next/navigation';
+import { useDispatch } from "react-redux"
+import { logout } from "@/redux/manager/manager"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export default function Navbar() {
 
 
-    const cookie = cookies()
-    const cookie3 = cookie.get("token")
+export default function Navbar({ token }: any) {
+    const dispatch = useDispatch()
+    const router = useRouter()
+    const handleLogout = async () => {
+        try {
+            const resp = await axios.post(`${BASE_URL}/manager/auth/logout`, {}, { withCredentials: true })
+            if (!resp.data) {
+                throw new Error("Error in Logout")
+            }
+
+            console.log(resp.data)
+            dispatch(logout(resp.data))
+            router.push("/auth/login")
+        } catch (error: any) {
+
+            console.log(error.message)
+        }
+    }
     return (
         <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6">
             <Sheet>
@@ -29,15 +48,14 @@ export default function Navbar() {
                         <Link href="/" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
                             Home
                         </Link>
-                        <Link href="/employee" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
-                            your employees
-                        </Link>
-                        <Link href="/employee/create" className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
-                            create employees
-                        </Link>
-                        <Link href={cookie3 ? "/auth/login" : "/auth/signup"} className="flex w-full items-center py-2 text-lg font-semibold" prefetch={false}>
-                            {cookie3 ? "signout" : "signin"}
-                        </Link>
+                        {token && <Link href="/employees" className={`flex w-full items-center py-2 text-lg font-semibold ${token ? '' : 'hidden'}`} prefetch={false}>
+                            employees
+                        </Link>}
+
+                        {token ? <button onClick={handleLogout} className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50">
+                            Logout
+                        </button> : <Link href="/auth/signup" className="flex w-full items-center py-2 text-lg font-semibold"
+                            prefetch={false}>signin</Link>}
                     </div>
                 </SheetContent>
             </Sheet>
@@ -47,30 +65,31 @@ export default function Navbar() {
             </Link>
             <nav className="ml-auto hidden lg:flex gap-6">
                 <Link
-                    href="#"
+                    href="/"
                     className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
                     prefetch={false}
                 >
                     Home
                 </Link>
-                <Link
-                    href="#"
-                    className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
+                {token && <Link
+                    href="/employees"
+                    className={`${token ? '' : 'hidden'} group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50`}
                     prefetch={false}
                 >
                     employees
-                </Link>
-                <Link
-                    href="#"
-                    className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
-                    prefetch={false}
-                >
-                    add employee
-                </Link>
-                {cookie3 ? <LogoutButton /> : <Link href="/auth/signup" className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
+                </Link>}
+
+                {token ? <button onClick={handleLogout} className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50">
+                    Logout
+                </button> : <Link href="/auth/signup" className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
                     prefetch={false}>signin</Link>}
+                {token && <Avatar onClick={() => router.push('/profile')}>
+                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarFallback>CN</AvatarFallback>
+                </Avatar>}
+
             </nav>
-        </header>
+        </header >
     )
 }
 

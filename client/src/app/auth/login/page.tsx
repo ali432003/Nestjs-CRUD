@@ -11,8 +11,10 @@ import Link from 'next/link'
 import axios from 'axios'
 import BASE_URL from '@/core'
 import { useRouter } from 'next/navigation'
+import { useDispatch } from 'react-redux'
+import { login } from '@/redux/manager/manager'
 
-export default function Component() {
+export default function Login() {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -29,6 +31,7 @@ export default function Component() {
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
+    const dispatch = useDispatch()
     const router = useRouter()
     const handleSubmit = async (e: any) => {
         e.preventDefault()
@@ -38,6 +41,7 @@ export default function Component() {
             try {
                 const resp = await axios.post(`${BASE_URL}/manager/auth/login`, { email: email, password: password }, { withCredentials: true })
                 console.log(resp.data)
+                dispatch(login(resp.data))
                 router.push("/")
             } catch (error) {
                 console.log(error)
